@@ -12,8 +12,7 @@ export class ProductListComponent implements OnInit {
 
   products: Product[] = [];
   currentCategoryID: number = 1;
-
-
+  searchMode: boolean = false;
 
   constructor(private productService: ProductService,
     private route: ActivatedRoute){}
@@ -28,24 +27,51 @@ export class ProductListComponent implements OnInit {
   
   listProducts() {
 
-    // check if "id" parameter is available
-  const hasCategoryID: boolean = this.route.snapshot.paramMap.has('id')
+    this.searchMode = this.route.snapshot.paramMap.has('keyword');
 
-  if (hasCategoryID){
-    // get the "id" param string. conver string to a number using the "+" symbol
-    this.currentCategoryID = +this.route.snapshot.paramMap.get('id')!;
-    // the "!" is a non-null assertion.
-  }
-  else{
-    // no category id available, used default of 1
-    this.currentCategoryID = 1;
+if (this.searchMode){
+  this.handleSearchProducts();
+}
+else{
+
+    this.handleListProducts();
+}
+
   }
 
-    this.productService.getProductList(this.currentCategoryID).subscribe(
-      data => {
-        this.products = data;
-      }
+  handleSearchProducts(){
+
+    const theKeyword: string = this.route.snapshot.paramMap.get('keyword')!;
+
+    // now search for the products using the keyword
+    this.productService.searchProducts(theKeyword).subscribe(
+    data => {
+      this.products = data;
+    }
     )
+
+  }
+  handleListProducts() {
+
+    // check if "id" parameter is available
+    const hasCategoryID: boolean = this.route.snapshot.paramMap.has('id')
+
+    if (hasCategoryID){
+      // get the "id" param string. conver string to a number using the "+" symbol
+      this.currentCategoryID = +this.route.snapshot.paramMap.get('id')!;
+      // the "!" is a non-null assertion.
+    }
+    else{
+      // no category id available, used default of 1
+      this.currentCategoryID = 1;
+    }
+  
+      this.productService.getProductList(this.currentCategoryID).subscribe(
+        data => {
+          this.products = data;
+        }
+      )
+
   }
 
 }
